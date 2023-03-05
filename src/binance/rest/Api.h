@@ -6,6 +6,8 @@
 
 #include <jsoncpp/json/json.h>
 
+#include "../../Log.h"
+
 namespace binance {
 namespace rest {
 

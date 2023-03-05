@@ -4,9 +4,11 @@
 #include <string_view>
 
 #include <curl/curl.h>
+#include <openssl/hmac.h>
 
 #include "Api.h"
 #include "../../Log.h"
+#include "../../Utils.h"
 
 namespace binance {
 namespace rest {
