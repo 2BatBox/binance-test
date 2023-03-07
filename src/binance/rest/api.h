@@ -95,36 +95,37 @@ struct AccountInformation {
 	}
 
 	void dump() const noexcept {
-		LOG_INFO("==== AccountInformation ====");
-		LOG_INFO("  makerCommission   : %zu", makerCommission);
-		LOG_INFO("  takerCommission   : %zu", takerCommission);
-		LOG_INFO("  buyerCommission   : %zu", buyerCommission);
-		LOG_INFO("  sellerCommission  : %zu", sellerCommission);
+		LOG_INFO("==== AccountInformation ====\n");
+		LOG_INFO("  makerCommission   : %zu\n", makerCommission);
+		LOG_INFO("  takerCommission   : %zu\n", takerCommission);
+		LOG_INFO("  buyerCommission   : %zu\n", buyerCommission);
+		LOG_INFO("  sellerCommission  : %zu\n", sellerCommission);
 
-		LOG_INFO("  commissionRates");
-		LOG_INFO("    maker  : %f", commissionRates.maker);
-		LOG_INFO("    taker  : %f", commissionRates.taker);
-		LOG_INFO("    buyer  : %f", commissionRates.buyer);
-		LOG_INFO("    seller : %f", commissionRates.seller);
+		LOG_INFO("  commissionRates : ");
+		LOG_PLAIN(" maker='%f'", commissionRates.maker);
+		LOG_PLAIN(" taker='%f'", commissionRates.taker);
+		LOG_PLAIN(" buyer='%f'", commissionRates.buyer);
+		LOG_PLAIN(" seller='%f'\n", commissionRates.seller);
 
-		LOG_INFO("  canTrade    : %d", canTrade);
-		LOG_INFO("  canWithdraw : %d", canWithdraw);
-		LOG_INFO("  canDeposit  : %d", canDeposit);
-		LOG_INFO("  brokered    : %d", brokered);
-		LOG_INFO("  requireSelfTradePrevention  : %d", requireSelfTradePrevention);
+		LOG_INFO("  canTrade    : %d\n", canTrade);
+		LOG_INFO("  canWithdraw : %d\n", canWithdraw);
+		LOG_INFO("  canDeposit  : %d\n", canDeposit);
+		LOG_INFO("  brokered    : %d\n", brokered);
+		LOG_INFO("  requireSelfTradePrevention  : %d\n", requireSelfTradePrevention);
 
-		LOG_INFO("  updateTime  : %zu", updateTime);
-		LOG_INFO("  accountType : '%s'", accountType.c_str());
+		LOG_INFO("  updateTime  : %zu\n", updateTime);
+		LOG_INFO("  accountType : '%s'\n", accountType.c_str());
 
 		LOG_INFO("  balances :");
 		for(const auto& item : balances) {
-			LOG_INFO("    asset='%s' free='%s' locked='%s'", item.asset.c_str(), item.free.c_str(), item.locked.c_str());
+			LOG_INFO("    asset='%s' free='%s' locked='%s'\n", item.asset.c_str(), item.free.c_str(), item.locked.c_str());
 		}
 
-		LOG_INFO("  permissions :");
+		LOG_INFO("  permissions : ");
 		for(const auto& item : permissions) {
-			LOG_INFO("    '%s'", item.c_str());
+			LOG_PLAIN(" '%s'", item.c_str());
 		}
+		LOG_PLAIN("\n");
 	}
 
 };

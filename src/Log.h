@@ -6,38 +6,32 @@
 
 #include "Config.h"
 
-#ifndef LOG_LOG
-#define LOG_LOG(Symbol, Color, ...) { \
-	printf("%s[" Symbol "] ", Config::ColorLog ? Color : "" ); \
-	Log::time_short(stdout); \
-    printf(__VA_ARGS__); \
-    printf("%s\n", Config::ColorLog ? Log::NORMAL : "" ); \
-    fflush(stdout); \
+#ifndef LOG_PREFIX
+
+#define LOG_PREFIX(Symbol, Color) { \
+    printf("%s[" Symbol "] ", Config::ColorLog ? Color : "" ); \
+    Log::time_short(stdout); \
 }
-#endif
 
-#ifndef LOG_INFO
-#define LOG_INFO(...) LOG_LOG("I", Log::NORMAL, __VA_ARGS__);
-#endif
+#define LOG_TRACE(...)  { printf("%s : function '%s()' : line %d \n", __FILE__, __FUNCTION__, __LINE__); }
+#define LOG_PLAIN(...)  { printf(__VA_ARGS__); fflush(stdout); }
 
-#ifndef LOG_DEBUG
-#define LOG_DEBUG(...) LOG_LOG("D", Log::BLUE, __VA_ARGS__);
-#endif
+#define LOG_INFO(...)     LOG_PREFIX("I", Log::NORMAL); LOG_PLAIN(__VA_ARGS__);
+#define LOG_DEBUG(...)    LOG_PREFIX("D", Log::BLUE);   LOG_PLAIN(__VA_ARGS__);
+#define LOG_ERROR(...)    LOG_PREFIX("E", Log::YELLOW); LOG_PLAIN(__VA_ARGS__);
+#define LOG_CRITICAL(...) LOG_PREFIX("C", Log::RED); LOG_TRACE();  LOG_PLAIN(__VA_ARGS__);
 
-#ifndef LOG_ERROR
-#define LOG_ERROR(...) LOG_LOG("E", Log::YELLOW, __VA_ARGS__);
-#endif
-
-#ifndef LOG_CRITICAL
-#define LOG_CRITICAL(...) { \
-	printf("%s[C] ", Config::ColorLog ? Log::RED : ""); \
-	Log::time_short(stdout); \
-	printf("%s : %s : %d ", __FUNCTION__, __FILE__, __LINE__); \
-    printf(__VA_ARGS__); \
-    printf("%s\n", Config::ColorLog ? Log::NORMAL : "" ); \
-    fflush(stdout); \
+#define LOG_UD_FLOAT(Field, New, Old) { \
+	const bool ls = (New.Field < Old.Field); \
+	const bool gr = (New.Field > Old.Field); \
+	if(ls || gr) { \
+        if(ls) printf("%s", Log::YELLOW);\
+        if(gr) printf("%s", Log::GREEN);\
+	} else { printf("%s", Log::NORMAL); } \
+	printf(" "#Field "=%f", New.Field); \
 }
-#endif
+
+#endif // LOG_PREFIX
 
 class Log {
 

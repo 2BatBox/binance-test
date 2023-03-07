@@ -14,11 +14,16 @@ namespace ws {
 class Connector {
 
 	// The event consumer callback.
-	using CallBack_t = int (*)(const Json::Value&);
+	using CallBack_t = int (*)(void* instance, const Json::Value& value);
+
+	struct CallBackRecord {
+		CallBack_t callback;
+		void* instance;
+	};
 
 	lws_protocols _protocols[Config::WSProtocols_nb + 1u /*Termination item.*/];
 	lws_context* _context;
-	std::map<lws*, CallBack_t> _handles;
+	std::map<lws*, CallBackRecord> _handles;
 
 public:
 
@@ -48,11 +53,14 @@ public:
 
 		// The termination item in the list.
 		memset(_protocols + idx, 0, sizeof(*_protocols));
+
+		LOG_DEBUG("binance::ws::Connector()\n");
 	}
 
 
 	~Connector() noexcept {
 		lws_context_destroy(_context);
+		LOG_DEBUG("binance::ws::~Connector()\n");
 	}
 
 
@@ -61,6 +69,7 @@ public:
 	 * @return false - in case of any errors.
 	 */
 	bool init() noexcept {
+		LOG_DEBUG("binance::ws::Connector::init()\n");
 		bool result = true;
 
 		lws_context_creation_info info;
@@ -85,10 +94,13 @@ public:
 		return result;
 	}
 
-	bool register_ticker(CallBack_t callback, const std::string& symbol) noexcept {
+	bool register_ticker(CallBack_t callback, void* instance, const std::string& symbol) noexcept {
 		std::string url = "/ws/" + std::string(Config::BasicSymbol) + symbol + std::string("@ticker");
 		Utils::string_to_lower(url);
-		return register_callback(callback, url.c_str());
+
+		LOG_DEBUG("binance::ws::Connector::register_ticker(url='%s')\n", url.c_str());
+
+		return register_callback(callback, instance, url.c_str());
 	}
 
 	/**
@@ -98,8 +110,9 @@ public:
 		lws_service(_context, Config::WSServiceTimeoutMS);
 	}
 
+private:
 
-	bool register_callback(CallBack_t callback, const char* path) noexcept {
+	bool register_callback(CallBack_t callback, void* instance, const char* path) noexcept {
 		bool result = true;
 
 		lws_client_connect_info ccinfo;
@@ -119,7 +132,7 @@ public:
 
 		lws* connection = lws_client_connect_via_info(&ccinfo);
 		if(connection) {
-			_handles.insert(std::make_pair(connection, callback));
+			_handles.insert(std::make_pair(connection, CallBackRecord{callback, instance}));
 		} else {
 			LOG_ERROR("Unable to create an LWS connection.");
 			result = false;
@@ -127,7 +140,6 @@ public:
 		return result;
 	}
 
-private:
 
 	static int ws_callback(lws* wsi, enum lws_callback_reasons reason, void* user, void* in, size_t len) noexcept {
 		auto instance = reinterpret_cast<Connector*>(lws_get_opaque_user_data(wsi));
@@ -151,7 +163,8 @@ private:
 				if(reader.parse(std::string(input_string), json)) {
 					const auto it = _handles.find(ws);
 					if(it != _handles.end()) {
-						const auto err = it->second(json);
+						const auto& record = it->second;
+						const auto err = record.callback(record.instance, json);
 						if(err) {
 							LOG_ERROR("The consumer rejects the event '%s' err=%d", input_string, err);
 						}

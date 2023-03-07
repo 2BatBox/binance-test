@@ -6,7 +6,7 @@
 #include <curl/curl.h>
 #include <openssl/hmac.h>
 
-#include "Api.h"
+#include "api.h"
 #include "../../Log.h"
 #include "../../Utils.h"
 
@@ -47,9 +47,12 @@ public:
 		_curl(curl),
 		_host(std::move(host)),
 		_api_key(std::move(api_key)),
-		_secret_key(std::move(secret_key)) {}
+		_secret_key(std::move(secret_key)) {
+		LOG_DEBUG("binance::rest::Connector()\n");
+	}
 
 	~Connector() noexcept {
+		LOG_DEBUG("binance::rest::~Connector()\n");
 		if(_curl) {
 			curl_easy_cleanup(_curl);
 			_curl = nullptr;
@@ -61,6 +64,8 @@ public:
 	 * @return
 	 */
 	bool account(AccountInformation& acc_info, Time recvWindow = 0u) noexcept {
+		LOG_DEBUG("binance::rest::Connector::account\n");
+
 		// Request
 		std::string request("timestamp=" + timestamp());
 
@@ -129,7 +134,7 @@ private:
 		const auto err = curl_easy_perform(_curl);
 
 		if(err != CURLE_OK) {
-			LOG_ERROR("Connector::do_get() [FAIL]");
+			LOG_ERROR("Connector::do_get() [FAIL]\n");
 		}
 
 		return err == CURLE_OK;
@@ -151,15 +156,15 @@ private:
 
 				if(root.isMember("code") && root.isMember("msg")) {
 					LOG_ERROR("Bad-response:");
-					LOG_ERROR("\tcode='%s'", root["code"].asString().c_str());
-					LOG_ERROR("\tmsg='%s'", root["msg"].asString().c_str());
+					LOG_PLAIN(" code='%s'", root["code"].asString().c_str());
+					LOG_PLAIN("msg='%s'\n", root["msg"].asString().c_str());
 				} else {
 					result = struct_api.parse(root);
 				}
 			}
 
 		} catch (std::exception& e) {
-			LOG_INFO("JSON parsing error: %s", e.what());
+			LOG_INFO("JSON parsing error: %s\n", e.what());
 		}
 
 		return result;
