@@ -87,10 +87,10 @@ struct AccountInformation {
 			permissions.emplace_back(perm[idx].asString());
 		}
 
-		return vaidate();
+		return validate();
 	}
 
-	inline bool vaidate() const noexcept {
+	inline bool validate() const noexcept {
 		return true;
 	}
 
@@ -116,7 +116,7 @@ struct AccountInformation {
 		LOG_INFO("  updateTime  : %zu\n", updateTime);
 		LOG_INFO("  accountType : '%s'\n", accountType.c_str());
 
-		LOG_INFO("  balances :");
+		LOG_INFO("  balances :\n");
 		for(const auto& item : balances) {
 			LOG_INFO("    asset='%s' free='%s' locked='%s'\n", item.asset.c_str(), item.free.c_str(), item.locked.c_str());
 		}
@@ -128,6 +128,88 @@ struct AccountInformation {
 		LOG_PLAIN("\n");
 	}
 
+};
+
+
+struct Order {
+	String	 symbol;
+	SInteger orderId;
+	SInteger orderListId;
+	String	 clientOrderId;
+	Float	 price;
+	Float	 origQty;
+	Float	 executedQty;
+	Float	 cummulativeQuoteQty;
+	String	 status;
+	String	 timeInForce;
+	String	 type;
+	String	 side;
+	Float	 stopPrice;
+	Float	 icebergQty;
+	Time	 time;
+	Time	 updateTime;
+	Bool	 isWorking;
+	Float	 origQuoteOrderQty;
+	Time	 workingTime;
+	String	 selfTradePreventionMode;
+	SInteger preventedMatchId;
+	Float	 preventedQuantity;
+
+	bool parse(const Json::Value& root) {
+		symbol = root["symbol"].asString();
+		orderId = root["orderId"].asLargestInt();
+		orderListId = root["orderListId"].asLargestInt();
+		clientOrderId = root["clientOrderId"].asString();
+		price = std::stod(root["price"].asString());
+		origQty = std::stod(root["origQty"].asString());
+		executedQty = std::stod(root["executedQty"].asString());
+		cummulativeQuoteQty = std::stod(root["cummulativeQuoteQty"].asString());
+		status = root["status"].asString();
+		timeInForce = root["timeInForce"].asString();
+		symbol = root["symbol"].asString();
+		side = root["side"].asString();
+		stopPrice = std::stod(root["stopPrice"].asString());
+		icebergQty = std::stod(root["icebergQty"].asString());
+		time = root["icebergQty"].asLargestUInt();
+		isWorking = root["isWorking"].asBool();
+		origQuoteOrderQty = std::stod(root["origQuoteOrderQty"].asString());
+		workingTime = root["workingTime"].asLargestUInt();
+		selfTradePreventionMode = root["symbol"].asString();
+		preventedMatchId = root["preventedMatchId"].asLargestInt();
+		preventedQuantity = std::stod(root["preventedQuantity"].asString());
+
+		return validate();
+	}
+
+	inline bool validate() const noexcept {
+		return true;
+	}
+
+	void dump() const noexcept {
+		LOG_INFO("==== Order ====\n");
+		LOG_INFO("symbol = '%s'", symbol.c_str());
+	}
+};
+
+struct AllOrders {
+	std::vector<Order> orders;
+
+	bool parse(const Json::Value& root) {
+		const auto size = root.size();
+		orders.resize(size);
+		for(Json::ArrayIndex idx = 0; idx < size; ++idx) {
+			if(orders[idx].parse(root[idx])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	void dump() const noexcept {
+		for(const auto& item : orders) {
+			item.dump();
+		}
+	}
 };
 
 }; // namespace rest

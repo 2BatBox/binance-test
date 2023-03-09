@@ -3,7 +3,8 @@
 #include "CliConfig.h"
 #include "binance/rest/Connector.h"
 #include "binance/ws/Connector.h"
-#include "app/AppSymbolTracer.h"
+
+#include "app/AppDefault.h"
 
 bool signal_abort = false;
 
@@ -15,20 +16,9 @@ void signal_handler(int signum) {
 }
 
 template <typename Application>
-int run(const CliConfig& cli) noexcept {
+int run(const CliConfig& cli, CURL* culr_handler) noexcept {
 
 	int err = EXIT_SUCCESS;
-
-	auto culr_handler = curl_easy_init();
-	if(culr_handler == nullptr) {
-		LOG_CRITICAL("curl_easy_init() fails.\n");
-		return EXIT_FAILURE;
-	}
-
-	if(cli.currency_symbol == Config::BasicSymbol) {
-		LOG_ERROR("Basic symbol '%s' is not allowed to trade.\n", Config::BasicSymbol);
-		return EXIT_FAILURE;
-	}
 
 	signal(SIGINT, signal_handler);
 	signal(SIGTERM, signal_handler);
@@ -41,7 +31,7 @@ int run(const CliConfig& cli) noexcept {
 		return EXIT_FAILURE;
 	}
 
-	Application app(rest_conn, ws_conn, cli.currency_symbol);
+	Application app(rest_conn, ws_conn, cli);
 
 	while(not app.init()) {
 		LOG_CRITICAL("Application initialization has failed.\n");
@@ -58,20 +48,28 @@ int run(const CliConfig& cli) noexcept {
 	}
 	LOG_DEBUG("Leaving the service loop.\n");
 
+	app.finit();
+
 	return err;
 }
 
 int main(int argc, char** argv) {
+	const auto bin = argv[0];
 
 	CliConfig cli;
 	if(not cli.parse_args(argc, argv)) {
-		cli.print_usage(stderr, argv[0]);
+		cli.print_usage(stderr, bin);
 		return EXIT_FAILURE;
 	}
 
 	if(cli.help) {
-		cli.print_usage(stdout, argv[0]);
+		cli.print_usage(stdout, bin);
 		return EXIT_SUCCESS;
+	}
+
+	if(cli.currency_symbol == Config::BasicSymbol) {
+		LOG_ERROR("Basic symbol '%s' is not allowed to trade.\n", Config::BasicSymbol);
+		return EXIT_FAILURE;
 	}
 
 	if(curl_global_init(CURL_GLOBAL_DEFAULT)) {
@@ -79,7 +77,13 @@ int main(int argc, char** argv) {
 		return EXIT_FAILURE;
 	}
 
-	auto err = run<AppSymbolTracer>(cli);
+	auto culr_handler = curl_easy_init();
+	if(culr_handler == nullptr) {
+		LOG_CRITICAL("curl_easy_init() fails.\n");
+		return EXIT_FAILURE;
+	}
+
+	const auto err = run<AppDefault>(cli, culr_handler);
 
 	curl_global_cleanup();
 

@@ -65,9 +65,7 @@ struct SymbolTicker {
 		return true;
 	}
 
-	void dump() const noexcept {
-
-	}
+	void dump() const noexcept {}
 
 };
 

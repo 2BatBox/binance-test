@@ -15,6 +15,7 @@ public:
 		size_t offset = 0;
 		if(arg) {
 			char* endptr;
+			errno = EXIT_SUCCESS;
 			const auto raw_value = std::strtod(arg, &endptr);
 			if(errno == 0) {
 				value = raw_value;

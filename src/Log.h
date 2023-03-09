@@ -16,19 +16,19 @@
 #define LOG_TRACE(...)  { printf("%s : function '%s()' : line %d \n", __FILE__, __FUNCTION__, __LINE__); }
 #define LOG_PLAIN(...)  { printf(__VA_ARGS__); fflush(stdout); }
 
-#define LOG_INFO(...)     LOG_PREFIX("I", Log::NORMAL); LOG_PLAIN(__VA_ARGS__);
-#define LOG_DEBUG(...)    LOG_PREFIX("D", Log::BLUE);   LOG_PLAIN(__VA_ARGS__);
+#define LOG_INFO(...)     LOG_PREFIX("I", Log::BLUE); LOG_PLAIN(__VA_ARGS__);
+#define LOG_DEBUG(...)    LOG_PREFIX("D", Log::NORMAL);   LOG_PLAIN(__VA_ARGS__);
 #define LOG_ERROR(...)    LOG_PREFIX("E", Log::YELLOW); LOG_PLAIN(__VA_ARGS__);
 #define LOG_CRITICAL(...) LOG_PREFIX("C", Log::RED); LOG_TRACE();  LOG_PLAIN(__VA_ARGS__);
 
-#define LOG_UD_FLOAT(Field, New, Old) { \
-	const bool ls = (New.Field < Old.Field); \
-	const bool gr = (New.Field > Old.Field); \
+#define LOG_LESS_GREATER_FLOAT(New, Old) { \
+	const bool ls = (New < Old); \
+	const bool gr = (New > Old); \
 	if(ls || gr) { \
         if(ls) printf("%s", Log::YELLOW);\
         if(gr) printf("%s", Log::GREEN);\
-	} else { printf("%s", Log::NORMAL); } \
-	printf(" "#Field "=%f", New.Field); \
+	} \
+	printf("%f%s", New, Log::NORMAL); \
 }
 
 #endif // LOG_PREFIX

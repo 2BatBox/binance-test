@@ -36,6 +36,7 @@ private:
 		size_t offset = 0;
 		if(arg && base) {
 			char* endptr;
+			errno = EXIT_SUCCESS;
 			const auto raw_value = std::strtoull(arg, &endptr, base);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
@@ -54,6 +55,7 @@ private:
 		size_t offset = 0;
 		if(arg && base) {
 			char* endptr;
+			errno = EXIT_SUCCESS;
 			const auto raw_value = std::strtoll(arg, &endptr, base);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
