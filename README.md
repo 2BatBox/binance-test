@@ -11,13 +11,13 @@ libwebsockets-dev >= 15
 #How to build the sample?
 
 ```
-sudo apt-get install libcurl4-gnutls-dev libssl-dev libjsoncpp-dev libwebsockets-dev
+sudo apt-get install cmake make gcc g++ libcurl4-gnutls-dev libssl-dev libjsoncpp-dev libwebsockets-dev
 ```
 
 
 ```
-git clone ...
-cd ...
+git clone https://github.com/2SilentJay/binance-test.git
+cd binance-test
 mkdir build
 cd build
 cmake ../
