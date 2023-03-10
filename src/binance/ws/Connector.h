@@ -94,8 +94,8 @@ public:
 		return result;
 	}
 
-	bool register_ticker(CallBack_t callback, void* instance, const std::string& symbol) noexcept {
-		std::string url = "/ws/" + std::string(Config::BasicSymbol) + symbol + std::string("@ticker");
+	bool register_ticker(CallBack_t callback, void* instance, const std::string& pair) noexcept {
+		std::string url = "/ws/" + pair + std::string("@ticker");
 		Utils::string_to_lower(url);
 
 		LOG_DEBUG("binance::ws::Connector::register_ticker(url='%s')\n", url.c_str());

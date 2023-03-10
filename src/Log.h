@@ -28,7 +28,7 @@
         if(ls) printf("%s", Log::YELLOW);\
         if(gr) printf("%s", Log::GREEN);\
 	} \
-	printf("%f%s", New, Log::NORMAL); \
+	printf("%.17f%s", New, Log::NORMAL); \
 }
 
 #endif // LOG_PREFIX

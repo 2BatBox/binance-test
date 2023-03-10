@@ -2,6 +2,8 @@
 
 #include <string>
 #include <algorithm>
+#include <ctime>
+#include "Config.h"
 
 class Utils {
 public:
@@ -24,6 +26,10 @@ public:
 			result[i * 2u + 1u] = base_16[u8ptr[i] & 0x0F];
 		}
 		return result;
+	}
+
+	static inline std::time_t time_now_sec() noexcept {
+		return std::time(nullptr);
 	}
 
 };

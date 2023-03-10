@@ -12,8 +12,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  ${GCC_FLAGS}")
 
 add_executable(${PROJECT_NAME}
         src/main.cpp
-        src/binacpp.cpp
-        src/binacpp_utils.cpp
         )
 
 target_link_libraries(${PROJECT_NAME} curl jsoncpp websockets ssl crypto)

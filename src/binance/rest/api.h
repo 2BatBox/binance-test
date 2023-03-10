@@ -128,6 +128,19 @@ struct AccountInformation {
 		LOG_PLAIN("\n");
 	}
 
+	bool get_balance(std::string symbol, double& balance) const noexcept {
+		Utils::string_to_lower(symbol);
+		for(const auto& sym : balances) {
+			std::string asset = sym.asset;
+			Utils::string_to_lower(asset);
+			if(asset == symbol) {
+				balance = std::stod(sym.free);
+				return true;
+			}
+		}
+		return false;
+	}
+
 };
 
 
@@ -154,6 +167,11 @@ struct Order {
 	String	 selfTradePreventionMode;
 	SInteger preventedMatchId;
 	Float	 preventedQuantity;
+
+	enum class Side {
+		BUY,
+		SELL
+	};
 
 	bool parse(const Json::Value& root) {
 		symbol = root["symbol"].asString();
@@ -210,6 +228,29 @@ struct AllOrders {
 			item.dump();
 		}
 	}
+};
+
+struct NewOrderResponse {
+
+	String	 symbol;
+	SInteger orderId;
+	String	 clientOrderId;
+
+	bool parse(const Json::Value& root) {
+		symbol = root["symbol"].asString();
+		orderId = root["orderId"].asLargestInt();
+		clientOrderId = root["clientOrderId"].asString();
+		return true;
+	}
+
+	void dump() const noexcept {
+		LOG_INFO("NewOrderResponse :");
+		LOG_PLAIN(" symbol='%s'", symbol.c_str());
+		LOG_PLAIN(" orderId=%zu", orderId);
+		LOG_PLAIN(" clientOrderId='%s'", clientOrderId.c_str());
+		LOG_PLAIN("\n");
+	}
+
 };
 
 }; // namespace rest

@@ -96,19 +96,14 @@ public:
 	 * @param recv_window
 	 * @return
 	 */
-	bool all_orders(AllOrders& all_orders, const binance::String& symbol, const Time recv_window = 0u) noexcept {
+	bool all_orders(AllOrders& all_orders, const String& symbol) noexcept {
 		LOG_DEBUG("binance::rest::Connector::all_orders()\n");
 
 		// Request
 		std::string request("symbol=" + symbol);
 		request.append("&timestamp=" + timestamp());
 
-		if(recv_window) {
-			request.append("&recvWindow=" + std::to_string(recv_window));
-		}
-
 		const auto signature = sign(request);
-
 		request.append("&signature=");
 		request.append(signature);
 
@@ -117,6 +112,44 @@ public:
 		url.append(request);
 
 		return do_get(url.c_str()) && parse_response(all_orders);
+	}
+
+	bool new_market_order(
+		NewOrderResponse& response, const String& symbol, const Order::Side& side, const Float quantity
+		, const Time recv_window = 0u
+	                     ) noexcept {
+		LOG_DEBUG("binance::rest::Connector::new_market_order()\n");
+
+		// Request
+		std::string request("symbol=" + symbol);
+		request.append("&side=");
+
+		switch(side) {
+			case Order::Side::BUY:
+				request.append("BUY");
+				break;
+
+			case Order::Side::SELL:
+				request.append("SELL");
+				break;
+
+			default:
+				LOG_CRITICAL("Unknown order side.");
+				return false;
+		}
+
+		request.append("&type=MARKET");
+		request.append("&quoteOrderQty=" + std::to_string(quantity));
+		request.append("&timestamp=" + timestamp());
+
+		const auto signature = sign(request);
+		request.append("&signature=");
+		request.append(signature);
+
+		// URL
+		std::string url(_host + "/api/v3/order?");
+
+		return do_post(url.c_str(), request) && parse_response(response);
 	}
 
 private:
@@ -146,10 +179,34 @@ private:
 	}
 
 	bool do_get(const char* url) noexcept {
+		prepare(url);
+		const auto err = curl_easy_perform(_curl);
 
+		if(err != CURLE_OK) {
+			LOG_ERROR("binnance::rest::Connector::do_get() '%s'\n", curl_easy_strerror(err));
+		}
+
+		return err == CURLE_OK;
+	}
+
+	bool do_post(const char* url, const std::string& post_data) {
+		prepare(url);
+		curl_easy_setopt(_curl, CURLOPT_POSTFIELDS, post_data.c_str());
+		const auto err = curl_easy_perform(_curl);
+
+		if(err != CURLE_OK) {
+			LOG_ERROR("binnance::rest::Connector::do_post() '%s'\n", curl_easy_strerror(err));
+		}
+
+//		LOG_INFO("%s\n", _response.c_str());
+
+		return err == CURLE_OK;
+
+	}
+
+	void prepare(const char* url) noexcept {
 		_response.clear();
-
-		LOG_DEBUG("URL=%s\n", url);
+		curl_easy_reset(_curl);
 
 		curl_easy_setopt(_curl, CURLOPT_URL, url);
 		curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, receiver);
@@ -164,14 +221,6 @@ private:
 			}
 			curl_easy_setopt(_curl, CURLOPT_HTTPHEADER, item);
 		}
-
-		const auto err = curl_easy_perform(_curl);
-
-		if(err != CURLE_OK) {
-			LOG_ERROR("Connector::do_get() [FAIL]\n");
-		}
-
-		return err == CURLE_OK;
 	}
 
 

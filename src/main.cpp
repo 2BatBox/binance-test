@@ -11,8 +11,13 @@ bool signal_abort = false;
 void signal_handler(int signum) {
 	if(signum == SIGINT || signum == SIGTERM) {
 		LOG_DEBUG("Abort signal.\n");
-		signal_abort = true;
+		if(not signal_abort) {
+			signal_abort = true;
+		} else {
+			exit(EXIT_FAILURE);
+		}
 	}
+
 }
 
 template <typename Application>

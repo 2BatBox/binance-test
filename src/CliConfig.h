@@ -27,8 +27,6 @@ struct CliConfig {
 	std::string all_args;
 
 	CliConfig() noexcept {
-		api_key = "S29FZQwAdpI8kyLRsmw9t3BkkKUxk9fKRM1YIMO7J3ne3uL0vcsJZEyI7i4pGJYT"; // TODO:
-		secret_key = "yKZ0NuW7CRwByWkD8JxRaOkcwQIBQefAt7vGdEsb7EJPFVK5wUBcoTegamxStpIQ"; // TODO:
 		currency_symbol = "BTC";
 		trade_period_sec = 30u;
 		wait_period_sec = 15u;
@@ -62,7 +60,7 @@ struct CliConfig {
 
 		while((opt = getopt(argc, argv, short_options)) != EOF) {
 			switch(opt) {
-				case 'a':
+				case 'k':
 					api_key = std::string(optarg);
 					break;
 
@@ -121,10 +119,10 @@ struct CliConfig {
 
 	void print_usage(FILE* out, const char* bin) {
 		CliConfig def;
-		printf("usage %s -as[cth]\n", bin);
+		printf("usage %s -ks[cth]\n", bin);
 
 		fprintf(out, "Application options:\n");
-		fprintf(out, "\t-a String. API key. (not an empty string)\n");
+		fprintf(out, "\t-k String. API key. (not an empty string)\n");
 		fprintf(out, "\t-s String. Secret key. (not an empty string)\n");
 		fprintf(out, "\t-c String. Symbol to trade. (not an empty string) [default value = '%s']\n", def.currency_symbol.c_str());
 		fprintf(out, "\t-t Integer. Trade period seconds. (greater than zero) [default value = %d]\n", def.trade_period_sec);
