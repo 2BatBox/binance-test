@@ -216,7 +216,7 @@ private:
 
 		if(not _http_headers.empty()) {
 			struct curl_slist* item = nullptr;
-			for(const auto str : _http_headers) {
+			for(const auto& str : _http_headers) {
 				item = curl_slist_append(item, str.c_str());
 			}
 			curl_easy_setopt(_curl, CURLOPT_HTTPHEADER, item);
